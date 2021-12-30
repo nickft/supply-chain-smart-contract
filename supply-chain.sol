@@ -63,16 +63,45 @@ pragma solidity ^0.7.0;
 
 */
 
+/**
+    For the second part of the first ampliation what we want to do is too add information of the product so It can be checked when creating the smart contract. And modified.
+    The information we want to add is:
+        Name of the product
+        price of the product
+    Functionalities:
+        Check name and price.
+            Make variables public so easy to check
+        Modify the price of the product if it has not been bought.
+            We will need a variable to indicate if the product has been bought.
+*/
 contract Amazon {
 
+    /*** Storage ***/
     address payable seller;
     address buyer;
+    /** Data about the product **/
+    string public productName;
+    uint256 public price;
+    bool productBought; //Does not need initialization to false because done by default by Solidity
 
-
-    constructor() {
+    /**
+        For varaibles of type array we need to specify an explicit data location.
+        Data location can be storage or memory.
+        storage is for persistent data and memory is for volatile data (as it is non persistent)
+        In our case we will copy the value from memory to the storage we already have. 
+    */
+    constructor(uint256 _sellPrice, string memory _name) {
         seller = payable(msg.sender);
+        productName = _name;
+        price = _sellPrice;
     }
 
+    modifier isSeller() {
+        require(msg.sender == seller);
+        _;
+    }
+
+    /*** Functions ***/
     function depositPayment() payable public{
         //require
         // 5a
@@ -83,6 +112,7 @@ contract Amazon {
 
         // action
         buyer = msg.sender;
+        productBought = true;
     }
 
     function confirmDelivery() public{
@@ -91,6 +121,17 @@ contract Amazon {
 
         // action
         seller.transfer(1 ether);
+    }
+
+    /** Note: 
+        Difference between external and public is that public methods can be called by 
+        inside the contract, other contracts that inherit the contract and other contracts and accounts.
+        external contracts can only be called by other contracts or accounts.
+    */
+    function changePrice(uint256 _newSellPrice) external isSeller {
+        require(productBought==false); //A price cannot be changed if the product is bought.
+
+        price=_newSellPrice;    
     }
 
 }
