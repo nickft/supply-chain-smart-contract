@@ -1,0 +1,45 @@
+SmartContract:
+	Incentive Buyer to confirmDelivery:
+		Pay more when buying.
+		Confirm returns the securityDeposit.
+		
+	ExpirationDate (30 Days?) max to confirm. If confirmation expires then Buyer gets nothing (or maybe half of the deposit??
+		Check period on Confirmation function.
+	
+	Method for seller to recover the money if ExpirationDate has passed and client doesn't confirm
+		New function.
+		Seller cannot access the money if period hasn't expired.
+		
+	
+	Store the Buy Date.
+	
+--->
+	Do it for simple case (no map)
+	Variable to store date of transaction.
+	
+	Store name and price. CHECK FOR FREEE AND SELLER CAN CHANGE IT.
+		Seller cannot change if product Bought..
+		(Variable to check if product bought)
+		SecurityDeposit variable also.
+		
+	Extend confirmation to extend the date if not, return SecurityDeposit back
+	Second function for seller to recover the money if expired
+	
+-----------------------------
+Second Part:
+	Add buffer of X extra days to wait.
+	Additional function so customer can rever the purchase anbd send item back.
+	Confirmation of rever for the seller.
+	
+	The same in different directions.
+	
+	Time to return starts when confirming delivery.
+
+------------------------------
+If we have time... ask for extension and do the 3rd part.
+
+---------------
+Nikos: Confirmation Delivery.
+Pablo: The burocratial stuff.
+
+2nd part:
