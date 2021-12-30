@@ -81,7 +81,7 @@ contract Amazon {
     address buyer;
     /** Data about the product **/
     string public productName;
-    uint256 public price;
+    uint32 public price; //IN ETHER 
     bool productBought; //Does not need initialization to false because done by default by Solidity
 
     /**
@@ -90,7 +90,7 @@ contract Amazon {
         storage is for persistent data and memory is for volatile data (as it is non persistent)
         In our case we will copy the value from memory to the storage we already have. 
     */
-    constructor(uint256 _sellPrice, string memory _name) {
+    constructor(uint32 _sellPrice, string memory _name) {
         seller = payable(msg.sender);
         productName = _name;
         price = _sellPrice;
@@ -105,7 +105,8 @@ contract Amazon {
     function depositPayment() payable public{
         //require
         // 5a
-        require(msg.value == 1 ether);
+        // We cannot use "ether" keyword with variables, only constants. but is equivalent to *10^18
+        require(msg.value == price * 10**18);
 
         // 5b
         require(buyer == address(0));
@@ -120,7 +121,8 @@ contract Amazon {
         require(msg.sender == buyer);
 
         // action
-        seller.transfer(1 ether);
+        seller.transfer(price * 10**18);
+        productBought=false;
     }
 
     /** Note: 
@@ -128,7 +130,7 @@ contract Amazon {
         inside the contract, other contracts that inherit the contract and other contracts and accounts.
         external contracts can only be called by other contracts or accounts.
     */
-    function changePrice(uint256 _newSellPrice) external isSeller {
+    function changePrice(uint32 _newSellPrice) external isSeller {
         require(productBought==false); //A price cannot be changed if the product is bought.
 
         price=_newSellPrice;    
