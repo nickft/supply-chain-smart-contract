@@ -74,18 +74,22 @@ pragma solidity ^0.7.0;
         Modify the price of the product if it has not been bought.
             We will need a variable to indicate if the product has been bought.
 */
+
 contract Amazon {
+
+    uint public constant SECURITY_DEPOSIT_IN_ETHER = 1;
 
     /*** Storage ***/
     address payable seller;
-    address buyer;
+    address payable buyer;
+    uint256 public purchaseDate;
     /** Data about the product **/
     string public productName;
     uint32 public price; //IN ETHER 
     bool productBought; //Does not need initialization to false because done by default by Solidity
 
     /**
-        For varaibles of type array we need to specify an explicit data location.
+        For variables of type array we need to specify an explicit data location.
         Data location can be storage or memory.
         storage is for persistent data and memory is for volatile data (as it is non persistent)
         In our case we will copy the value from memory to the storage we already have. 
@@ -97,43 +101,55 @@ contract Amazon {
     }
 
     modifier isSeller() {
-        require(msg.sender == seller);
+        require(msg.sender == seller, "Only the seller can perform this function");
+        _;
+    }
+
+    modifier isBuyer(){
+        require(msg.sender == buyer, "Only the client can perform this function");
         _;
     }
 
     /*** Functions ***/
-    function depositPayment() payable public{
-        //require
+    function depositPayment() external payable {
         // 5a
-        // We cannot use "ether" keyword with variables, only constants. but is equivalent to *10^18
-        require(msg.value == price * 10**18);
+        require(buyer == address(0), "The product has already been purchased.");
 
         // 5b
-        require(buyer == address(0));
+        require(!productBought, "The amount of money for the product has already been deposited.");
+
+        // 5c
+        // We cannot use "ether" keyword with variables, only constants. but is equivalent to *10^18
+        require(msg.value == (price + SECURITY_DEPOSIT_IN_ETHER) * 10**18, "There is not enough money in the transaction to cover the price plus the security deposit.");
+
 
         // action
         buyer = msg.sender;
         productBought = true;
+        purchaseDate = block.timestamp;
     }
 
-    function confirmDelivery() public{
-        // 6a
-        require(msg.sender == buyer);
+    function confirmDelivery() external payable isBuyer {
+        // 30 days to epochs = 2592000 
 
-        // action
-        seller.transfer(price * 10**18);
-        productBought=false;
+        //DEBUG: 1 minute to epochs = 60
+        if(block.timestamp - purchaseDate < 60){
+            seller.transfer(price * 10**18);
+            buyer.transfer(SECURITY_DEPOSIT_IN_ETHER * 10**18);
+        } else {
+            seller.transfer( (price + SECURITY_DEPOSIT_IN_ETHER) * 10**18);
+        }
     }
+
 
     /** Note: 
         Difference between external and public is that public methods can be called by 
         inside the contract, other contracts that inherit the contract and other contracts and accounts.
         external contracts can only be called by other contracts or accounts.
     */
-    function changePrice(uint32 _newSellPrice) external isSeller {
-        require(productBought==false); //A price cannot be changed if the product is bought.
+    function changePrice(uint32 _newSellPrice) external payable isSeller {
+        require(productBought==false, "A price cannot be changed if the product is bought.");
 
         price=_newSellPrice;    
     }
-
 }
