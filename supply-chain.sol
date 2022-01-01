@@ -141,6 +141,16 @@ contract Amazon {
         }
     }
 
+    /**
+        Function for the seller to call if the expirationTime has passed an the client does not confirm the delivery.
+        We are assuming that all the items arrive to the destiny, if not Seller could get the money an maybe client never receive the product.
+    */
+    function receiveDeposit() external payable isSeller {
+        if (block.timestamp - purchaseDate > 60) {
+            seller.transfer((price+SECURITY_DEPOSIT_IN_ETHER) * 10**18);
+        }
+    }
+
 
     /** Note: 
         Difference between external and public is that public methods can be called by 
