@@ -83,6 +83,9 @@ contract Amazon {
     address payable seller;
     address payable buyer;
     uint256 public purchaseDate;
+    uint256 public confirmationDate;
+    uint256 public returnDate;
+    bool itemReturned;
     /** Data about the product **/
     string public productName;
     uint32 public price; //IN ETHER 
@@ -139,6 +142,7 @@ contract Amazon {
         } else {
             seller.transfer( (price + SECURITY_DEPOSIT_IN_ETHER) * 10**18);
         }
+        confirmationDate = block.timestamp;
     }
 
     /**
@@ -151,7 +155,6 @@ contract Amazon {
         }
     }
 
-
     /** Note: 
         Difference between external and public is that public methods can be called by 
         inside the contract, other contracts that inherit the contract and other contracts and accounts.
@@ -162,4 +165,50 @@ contract Amazon {
 
         price=_newSellPrice;    
     }
+
+     /**
+        Return Policy:
+            The buyer can return the item.
+            The seller will confirm when te item is received and pay the price to the buyer.
+
+        Problem: The money must be in the smart contract first! (The money has already been transfered!!)
+        So we need like a protocol.
+        
+        Buyer: Requests to return. (I did not implement this, like empirical function I thought)
+        Seller: Accepts request and deposits price into the smart contract.
+        Seller: Receives the item and confirms in order to pay the buyer back.
+
+        I don't think that the seller needs an incentive to confirm the return.
+        I will develop a function for the buyer to be able to recover the seller's money if some time has passed.
+
+        NOTE: I'm Assuming the items are never lost and always arrive within a period of time.
+    */
+
+    /**
+        The Buyer is able to send the item back. 
+        If the buyer sends the item back, the seller will  be notified and will store to the Smart Contract the price that the Buyer payed to buy the item.
+        
+    */
+    function itemReturn() external payable isSeller {
+        require(msg.value == price * 10**18, "The price of the item was different");
+        require(block.timestamp - confirmationDate < 120, "The Period to return the product has expired");
+        
+        returnDate=block.timestamp;
+        itemReturned=true;
+    }
+
+    function confirmReturnReceived() external payable isSeller {
+        require(itemReturned==true, "The return request has not been issued.");
+        buyer.transfer(price* 10**18);
+    }
+
+    function buyerReclaimReturnPrice() external payable isBuyer {
+        require(itemReturned==true, "The return request has not been issued.");
+        require(block.timestamp - returnDate > 60, "The time needed to retreive the money is not met.");
+
+        buyer.transfer(price * 10**18);
+    }
+
+
+    
 }
