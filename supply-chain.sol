@@ -85,7 +85,7 @@ contract Amazon {
     uint256 public purchaseDate;
     uint256 public confirmationDate;
     uint256 public returnDate;
-    bool itemReturned;
+    bool returnRequested;
     /** Data about the product **/
     string public productName;
     uint32 public price; //IN ETHER 
@@ -150,6 +150,7 @@ contract Amazon {
         We are assuming that all the items arrive to the destiny, if not Seller could get the money an maybe client never receive the product.
     */
     function receiveDeposit() external payable isSeller {
+        require(returnRequested == false, "Cannot retreive the money if the return is issued");
         if (block.timestamp - purchaseDate > 60) {
             seller.transfer((price+SECURITY_DEPOSIT_IN_ETHER) * 10**18);
         }
@@ -194,19 +195,21 @@ contract Amazon {
         require(block.timestamp - confirmationDate < 120, "The Period to return the product has expired");
         
         returnDate=block.timestamp;
-        itemReturned=true;
+        returnRequested=true;
     }
 
     function confirmReturnReceived() external payable isSeller {
-        require(itemReturned==true, "The return request has not been issued.");
+        require(returnRequested==true, "The return request has not been issued.");
         buyer.transfer(price* 10**18);
+        returnRequested=false;
     }
 
     function buyerReclaimReturnPrice() external payable isBuyer {
-        require(itemReturned==true, "The return request has not been issued.");
+        require(returnRequested==true, "The return request has not been issued.");
         require(block.timestamp - returnDate > 60, "The time needed to retreive the money is not met.");
 
         buyer.transfer(price * 10**18);
+        returnRequested=false;
     }
 
 
