@@ -5,22 +5,24 @@ pragma solidity ^0.7.0;
 
     Create a trusted third party that stores the money until 
     the delivery of the product takes place. Like Amazon
+	
+	For this Smart Contract we assume that the product/package is never lost and will always reach it's destination in a set period of time.
 
     The functionality of the Smart Contract is presented in the following brief case scenario:
 
     1) A Seller (S) publishes (through the Smart Contract) an item for sale 
        providing name and price namely, "Ticket to Barcelona Match" and 1 Eth.
     2) A Buyer (B) wants to purchase so she deposits product's price + security deposit as a payment.
-       In our case the value = equals to 2 Eth.
+       In our case the Security Deposit equals to 1 Eth.
     3) S sees the money in the Smart Contract and sends the item to B.
-    4) Assuming that the shipment is not lost along the way, eventually B will receive her package.
+    4) B will receive her package.
     5) B needs to confirm the delivery of the product. If B confirms the delivery on time (e.g. under 30 days after the arrival) then
        S is getting paid with the price of the product while B receives hers security deposit intact. However, if B does not 
        confirm it on time, she receives a penalty which means that S will get both the product value as well as the security deposit.
     6) If B wants to return the product she has a specific period to do so (i.e. 10 days).
     7) Once S gets notified about B's decision, she sends the money (refund) to the smart contract. And waits for the item to return to S.
     8) Once S has received the product, she confirms the delivery and the refund is successfull
-    9) As in step 4) we assume that the shipment is not lost and eventually S will receive the package.
+    9) S will receive the package.
     9) S is being given a specific period of time (i.e. 10 days) to confirm the return of the product. If she confirms on time the money will
     be returned to B. If not, B has also the ability to withdraw the money from the smart contract once the aforementioned period has passed.
 */
